@@ -33,11 +33,14 @@ public class TicTacToeController implements PropertyChangeListener {
         // be displayed in the View (using its "setResult()" method).
         //
 
-        // setModelProperty("Mark", square);
+        //
 
-        //
-        // INSERT YOUR CODE HERE
-        //
+        while(model.getResult().equals("NONE"))
+        {
+            setModelProperty("Mark", square);
+        }
+
+        view.setResult(model.getResult().toString());
 
     }
 
