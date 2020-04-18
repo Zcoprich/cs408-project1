@@ -9,7 +9,7 @@ public class TicTacToeModel {
 
     private Mark[][] grid;      /* the game grid */
     private boolean xTurn;      /* is TRUE if X is the current player */
-    private int size;           /* the size (size and height) of the game grid */
+    private int size;           /* the size (width and height) of the game grid */
 
     private TicTacToeController controller;
 
@@ -36,16 +36,17 @@ public class TicTacToeModel {
         this.size = size;
         this.xTurn = true;
 
-        /* Create grid (size x size) as a 2D Mark array */
+        grid  = new Mark[size][size];
 
-        //
-        // INSERT YOUR CODE HERE
-        //
-
+        for(int i = 0 ; i < size; ++i) {
+            for (int j = 0; j < size; ++j) {
+                grid[i][j] = Mark.EMPTY;
+            }
+        }
     }
 
     public boolean setMark(TicTacToeSquare square) {
-
+        boolean markMade;
         //
         // This method accepts the target square as a TicTacToeSquare argument, and adds the
         // current player's mark to this square.  First, it should use "isValidSquare()" to check if
@@ -67,16 +68,15 @@ public class TicTacToeModel {
         else
             mark = Mark.O;
 
-        if(isValidSquare(row, col))
-            if(!isSquareMarked(row, col))
-            {
-                grid[row][col] = mark;
-                if(getResult() == Result.NONE)
-                {
-                    xTurn = !xTurn;
-                    return true;
-                }
-            }
+        if(isValidSquare(row, col) && !isSquareMarked(row, col)) {
+            grid[row][col] = mark;
+            if (mark.equals(Mark.X))
+                firePropertyChange(TicTacToeController.SET_SQUARE_X,this,square);
+            else
+                firePropertyChange(TicTacToeController.SET_SQUARE_O,this, square);
+            xTurn = !xTurn;
+            return true;
+        }
 
         return false;
 
@@ -84,21 +84,26 @@ public class TicTacToeModel {
 
     private boolean isValidSquare(int row, int col) {
 
-        if(row >= 0 && row < size)
-            if(col >= 0 && col < size)
+        // This method should return TRUE if the specified location is within bounds of the grid
+        //!
+
+        if (row >= 0 && row < size)
+            if (col >= 0 && col < size)
                 return true;
 
         return false;
-
     }
 
     private boolean isSquareMarked(int row, int col) {
 
-        if(grid[row][col] == Mark.X || grid[row][col] == Mark.O)
-            return true;
+        // This method should return TRUE if the square at the specified location is already marked
 
-        return false;
-
+        if(getMark(row,col) == Mark.X || getMark(row,col) == Mark.O){
+            return  true;
+        }
+        else{
+            return false;
+        }
     }
 
     public Mark getMark(int row, int col) {
@@ -111,98 +116,121 @@ public class TicTacToeModel {
 
     public Result getResult() {
 
-        Mark mark;
-        Result result;
+        //
+        // This method should return a Result value indicating the current state of the game.  It
+        // should use "isMarkWin()" to see if X or O is the winner, and "isTie()" to see if the game
+        // is a TIE.  If neither condition applies, return a default value of NONE.
+        //
 
-        if(isXTurn())
-        {
-            mark = Mark.X;
-            result = Result.X;
-        }
-        else
-        {
-            mark = Mark.O;
-            result = Result.O;
+        if(isMarkWin(Mark.X)){
+            return Result.X;
         }
 
-        if(isMarkWin(mark))
-            return result;
-        else if(isTie())
+        else if(isMarkWin(Mark.O)){
+            return Result.O;
+        }
+        else if(isTie()){
             return Result.TIE;
-        else
+        }
+
+        else{
             return Result.NONE;
+        }
 
     }
 
     private boolean isMarkWin(Mark mark) {
 
+        //
+        // This method should check the squares of the grid to see if the specified Mark is the
+        // winner.  (Hint: this method must check for complete rows, columns, and diagonals, using
+        // an algorithm which will work for all possible grid sizes!)
+        //
+
+        /* Check the squares of the board to see if the specified mark is the
+       winner */
+
+        /* INSERT YOUR CODE HERE */
+        //Checking for horizontal winner
+        int width = size;
+        int consecMarks = 0;
         int count = 0;
 
         // check each row
         for(int i = 0; i < size; i++)
         {
-            for(int j = 0; j < size; j++)
-            {
-                if(getMark(i, j) == mark)
+            for(int j = 0; j < size; j++) {
+                if (grid[i][j] == mark) {
                     count++;
+                    if (count == size)
+                        return true;
+                }
+                else {
+                    count = 0;
+                    break;
+                }
             }
-            if(count == size)
-                return true;
-            else
-                count = 0;
         }
 
-        //check each col
+
+        //Checking for vertical winner
         for(int i = 0; i < size; i++)
         {
-            for(int j = 0; j < size; j++)
-            {
-                if(getMark(j, i) == mark)
+            for(int j = 0; j < size; j++) {
+                if (grid[j][i] == mark) {
                     count++;
+                    if (count == size)
+                        return true;
+                }
+                else {
+                    count = 0;
+                    break;
+                }
             }
-            if(count == size)
-                return true;
-            else
-                count = 0;
         }
 
-        //check diagnol
-        for(int i = 0; i < size; i++)
-            if(getMark(i, i) == mark)
+
+        // Checking for diagonal winner
+        for(int i = 0; i < size; i++) {
+            if (grid[i][i] == mark) {
                 count++;
-        if(count == size)
-            return true;
-        else
-            count = 0;
+                if (count == size)
+                    return true;
+            }
+            else {
+                count = 0;
+                break;
+            }
+        }
 
 
-        //check reverse diagnol
-        for(int i = size - 1, j = 0; i >= 0; i--, j++)
-            if(getMark(i, j) == mark)
+        //Checking for the other diagonal winner
+        for(int i = size - 1, j = 0; i >= 0; i--, j++) {
+            if (grid[i][j] == mark) {
                 count++;
-        if(count == size)
-            return true;
-        else
-            count = 0;
+                if (count == size)
+                    return true;
+            }
+            else {
+                count = 0;
+                break;
+            }
 
-
-
+        }
         return false;
-
-
     }
 
     private boolean isTie() {
 
-        /* Check the squares of the grid to see if the game is a tie */
-
+        //
+        // This method should check the squares of the grid to see if the game is a tie.
+        //
         for(int i = 0; i < size; i++)
             for(int j = 0; j < size; j++)
                 if(grid[i][j] == Mark.EMPTY)
                     return false;
 
         return true;
-
     }
 
     public boolean isXTurn() {

@@ -35,13 +35,31 @@ public class TicTacToeController implements PropertyChangeListener {
 
         //
 
-        while(model.getResult().equals("NONE"))
-        {
-            setModelProperty("Mark", square);
+        if(model.getResult() == TicTacToeModel.Result.NONE){
+            //Make x mark
+            if(model.isXTurn() && model.setMark(square)){
+                setModelProperty(SET_SQUARE_X, square);
+            }
+
+            //Make o mark
+            else if(!model.isXTurn() && model.setMark(square)){
+                setModelProperty(SET_SQUARE_O, square);
+            }
+            //Rechecking the state of the game . tie, x win , or o win
+            if(model.getResult() == TicTacToeModel.Result.TIE){
+                view.setResult(TicTacToeModel.Result.TIE.toString());
+            }
+            else if(model.getResult() == TicTacToeModel.Result.O){
+                view.setResult(TicTacToeModel.Result.O.toString());
+            }
+            else if(model.getResult() == TicTacToeModel.Result.X){
+                view.setResult(TicTacToeModel.Result.X.toString());
+            }
+            else{
+                view.setResult(null);
+            }
+
         }
-
-        view.setResult(model.getResult().toString());
-
     }
 
     public int getGridSize() {
